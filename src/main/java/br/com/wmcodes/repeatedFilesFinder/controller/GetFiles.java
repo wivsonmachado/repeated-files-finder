@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -48,6 +49,29 @@ public class GetFiles {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public String elapsedTime(long time) {
+		String msg = null;
+		Duration duration = Duration.ofMillis(time);
+
+		if (time >= 0 && time <= 1000) {
+			msg = "Elapsed " + time + " milliseconds\n\n";
+		}
+
+		if (time >= 1001 && time <= 59000) {
+			return msg = "Elapsed time" + duration.toSecondsPart() + " seconds\n\n";
+		}
+
+		if (time >= 60000 && time <= 3599999) {
+			return msg = "Elapsed time" + duration.toMinutesPart() + " Min " + duration.toSecondsPart() + " s\n\n";
+		}
+		
+		if (time >= 3600000) {
+			return msg = "Elapsed time" + duration.toHoursPart() + " H " + duration.toMinutesPart() + " Min " + duration.toSecondsPart() + " s\n\n";
+		}
+
+		return msg;
 	}
 	
 	private String checksum(Path path) {
