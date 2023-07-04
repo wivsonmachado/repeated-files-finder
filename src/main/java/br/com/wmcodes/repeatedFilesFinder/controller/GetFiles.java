@@ -1,7 +1,9 @@
 package br.com.wmcodes.repeatedFilesFinder.controller;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,6 +11,7 @@ import java.time.Duration;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 
 import br.com.wmcodes.repeatedFilesFinder.model.FinderModel;
 import me.tongfei.progressbar.ProgressBar;
@@ -51,7 +54,19 @@ public class GetFiles {
 		
 	}
 	
-	public String elapsedTime(long time) {
+	public void createLogFile(long elapsedTime) throws IOException {
+		File logFile = new File(finder.getToMove() + "Log.txt");
+		String logElapsedTime = elapsedTime(elapsedTime);
+		FileUtils.write(logFile, logElapsedTime, Charset.forName("UTF-8"));		
+		
+		finder.comparingOriginalFiles.add(0, "Was founded " + finder.comparingOriginalFiles.size() + " repeateds files. ");
+		FileUtils.writeLines(logFile, finder.comparingOriginalFiles, true);
+
+		finder.corruptedFiles.add(0, "\n\n\nWas founded " + finder.corruptedFiles.size() + " files that may be corrupted, need attention.\n\n");
+		FileUtils.writeLines(logFile, finder.corruptedFiles,true);
+	}
+	
+	private String elapsedTime(long time) {
 		String msg = null;
 		Duration duration = Duration.ofMillis(time);
 
