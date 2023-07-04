@@ -1,5 +1,6 @@
 package br.com.wmcodes.repeatedFilesFinder.model;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,13 @@ public class FinderModel {
 	
 	public List<String> comparingOriginalFiles = new ArrayList<>();
 	public List<String> corruptedFiles = new ArrayList<>();
+	
+	public void createDirToMove() {
+		File dir = new File(toMove);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+	}
 	
 	
 	public FinderModel(String root) {
