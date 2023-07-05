@@ -19,19 +19,16 @@ import me.tongfei.progressbar.ProgressBarBuilder;
 
 public class GetFiles {
 	
-	private String root;
-	
 	private FinderModel finder;
 	
-	public GetFiles(String root) {
-		this.root = root;
-		this.finder = new FinderModel(getRoot());
+	public GetFiles(FinderModel model) {
+		this.finder = model;
 	}
 	
 	
 	public void captureFiles() {
 		
-		Path path = Paths.get(getRoot());
+		Path path = Paths.get(finder.getRoot());
 		
 		try(Stream<Path> stream = Files.walk(path, Integer.MAX_VALUE);
 				Stream<Path> stream2 = Files.walk(path, Integer.MAX_VALUE)){
@@ -61,11 +58,17 @@ public class GetFiles {
 		String logElapsedTime = elapsedTime(elapsedTime);
 		FileUtils.write(logFile, logElapsedTime, Charset.forName("UTF-8"));		
 		
-		finder.comparingOriginalFiles.add(0, "Was founded " + finder.comparingOriginalFiles.size() + " repeateds files. ");
-		FileUtils.writeLines(logFile, finder.comparingOriginalFiles, true);
+		if(finder.comparingOriginalFiles.isEmpty()) {
+			FileUtils.write(logFile, "\n\nNot found any repeated file.", Charset.forName("UTF-8"), true);
+		}else {
+			finder.comparingOriginalFiles.add(0, "Was founded " + finder.comparingOriginalFiles.size() + " repeateds files. ");
+			FileUtils.writeLines(logFile, finder.comparingOriginalFiles, true);			
+		}
 
-		finder.corruptedFiles.add(0, "\n\n\nWas founded " + finder.corruptedFiles.size() + " files that may be corrupted, need attention.\n\n");
-		FileUtils.writeLines(logFile, finder.corruptedFiles,true);
+		if(!finder.corruptedFiles.isEmpty()) {
+			finder.corruptedFiles.add(0, "\n\n\nWas founded " + finder.corruptedFiles.size() + " files that may be corrupted, need attention.\n\n");
+			FileUtils.writeLines(logFile, finder.corruptedFiles,true);
+		}
 	}
 	
 	private String elapsedTime(long time) {
@@ -100,16 +103,6 @@ public class GetFiles {
 			return checksum;
 		}
 		return checksum;
-	}
-	
-	
-
-	public String getRoot() {
-		return root;
-	}
-
-	public void setRoot(String root) {
-		this.root = root;
 	}
 	
 	

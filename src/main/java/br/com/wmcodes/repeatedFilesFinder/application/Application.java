@@ -3,13 +3,16 @@ package br.com.wmcodes.repeatedFilesFinder.application;
 import java.io.IOException;
 
 import br.com.wmcodes.repeatedFilesFinder.controller.GetFiles;
+import br.com.wmcodes.repeatedFilesFinder.model.FinderModel;
 
 public class Application {
 
 	public static void main(String[] args) {
 		long inicio = System.currentTimeMillis();
 		
-		GetFiles getFiles = new GetFiles(args[0]);
+		FinderModel model = new FinderModel(args[0]);
+		
+		GetFiles getFiles = new GetFiles(model);
 		
 		getFiles.captureFiles();
 		
