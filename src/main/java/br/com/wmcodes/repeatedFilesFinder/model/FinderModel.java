@@ -12,7 +12,7 @@ public class FinderModel {
 	private static String REPEATED_FILES_DIRECTORY = "/RepeatedFiles/";
 	
 	private String root;
-	private String toMove = root + REPEATED_FILES_DIRECTORY;
+	private String toMove;
 	
 	public Map<Path, String> nonRepeatedFiles = new HashMap<>();
 	
@@ -20,7 +20,7 @@ public class FinderModel {
 	public List<String> corruptedFiles = new ArrayList<>();
 	
 	public void createDirToMove() {
-		File dir = new File(toMove);
+		File dir = new File(getToMove());
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
@@ -29,6 +29,7 @@ public class FinderModel {
 	
 	public FinderModel(String root) {
 		this.root = root;
+		setToMove();
 	}
 
 	public String getRoot() {
@@ -39,6 +40,10 @@ public class FinderModel {
 		this.root = root;
 	}
 	
+	public void setToMove() {
+		this.toMove = getRoot() + REPEATED_FILES_DIRECTORY;
+	}
+
 	public String getToMove() {
 		return toMove;
 	}	

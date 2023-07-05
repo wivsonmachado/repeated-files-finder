@@ -21,14 +21,16 @@ public class GetFiles {
 	
 	private String root;
 	
-	private FinderModel finder = new FinderModel(getRoot());
+	private FinderModel finder;
 	
 	public GetFiles(String root) {
 		this.root = root;
+		this.finder = new FinderModel(getRoot());
 	}
 	
-
+	
 	public void captureFiles() {
+		
 		Path path = Paths.get(getRoot());
 		
 		try(Stream<Path> stream = Files.walk(path, Integer.MAX_VALUE);
@@ -40,7 +42,7 @@ public class GetFiles {
 						.forEach(e -> {
 							String hash = checksum(e);
 							if(hash != null) {
-								if(finder.nonRepeatedFiles.isEmpty() || !finder.nonRepeatedFiles.containsKey(e)) {
+								if(finder.nonRepeatedFiles.isEmpty() || !finder.nonRepeatedFiles.containsValue(hash)) {
 									finder.nonRepeatedFiles.put(e, hash);
 								}else {
 									finder.createDirToMove();
@@ -75,7 +77,7 @@ public class GetFiles {
 		}
 
 		if (time >= 1001 && time <= 59000) {
-			return msg = "Elapsed time" + duration.toSecondsPart() + " seconds\n\n";
+			return msg = "Elapsed time " + duration.toSecondsPart() + " seconds\n\n";
 		}
 
 		if (time >= 60000 && time <= 3599999) {
