@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -17,11 +18,11 @@ import br.com.wmcodes.repeatedFilesFinder.model.FinderModel;
 import me.tongfei.progressbar.ProgressBar;
 import me.tongfei.progressbar.ProgressBarBuilder;
 
-public class GetFiles {
+public class FinderFilesUtils {
 	
 	private FinderModel finder;
 	
-	public GetFiles(FinderModel model) {
+	public FinderFilesUtils(FinderModel model) {
 		this.finder = model;
 	}
 	
@@ -42,31 +43,57 @@ public class GetFiles {
 								if(finder.nonRepeatedFiles.isEmpty() || !finder.nonRepeatedFiles.containsValue(hash)) {
 									finder.nonRepeatedFiles.put(e, hash);
 								}else {
-									finder.createDirToMove();
-									finder.comparingOriginalFiles.add(e.getFileName().toString());
+									finder.repeatedFiles.add(e);
 								}
 							}
-						});			
+						});
+					stream.close();
+					stream2.close();
 		}catch(IOException e){
 			e.printStackTrace();
 		}
 		
 	}
 	
+	public void deleteFiles(FinderModel finder, File logFile) {
+		List<Path> filesToDelete = finder.repeatedFiles;
+		Stream<Path> stream = filesToDelete.stream();
+		try {
+			FileUtils.write(logFile, "\n\nDeleted files: " + filesToDelete.size() + "\n", Charset.forName("UTF-8"), true);
+		} catch (IOException e1) {
+			finder.corruptedFiles.add(finder.corruptedFiles.size(), e1.getMessage());
+		}
+		ProgressBarBuilder builder = new ProgressBarBuilder().setTaskName("Deleting Files")
+				.setInitialMax(filesToDelete.size());
+		ProgressBar.wrap(stream, builder)
+			.forEach(t -> {
+				try {
+					Files.deleteIfExists(t);
+					FileUtils.write(logFile, "\nFile deleted: " + t.getFileName().toString(), Charset.forName("UTF-8") , true);
+					finder.logger.add("File deleted: " + t.getFileName().toString());
+				} catch (IOException e) {
+					finder.corruptedFiles.add(finder.corruptedFiles.size(), e.getMessage());
+				}
+			});
+		
+	}
+	
 	public void createLogFile(long elapsedTime) throws IOException {
-		File logFile = new File(finder.getToMove() + "Log.txt");
+		File logFile = new File(finder.getRoot() + "Log.txt");
 		String logElapsedTime = elapsedTime(elapsedTime);
 		FileUtils.write(logFile, logElapsedTime, Charset.forName("UTF-8"));		
 		
-		if(finder.comparingOriginalFiles.isEmpty()) {
+		if(finder.repeatedFiles.isEmpty()) {
 			FileUtils.write(logFile, "\n\nNot found any repeated file.", Charset.forName("UTF-8"), true);
 		}else {
-			finder.comparingOriginalFiles.add(0, "Was founded " + finder.comparingOriginalFiles.size() + " repeateds files. ");
-			FileUtils.writeLines(logFile, finder.comparingOriginalFiles, true);			
+			finder.logger.add(0, "Was founded " + finder.repeatedFiles.size() + " repeateds files. \n\n");
+			FileUtils.writeLines(logFile, finder.logger, true);
+			FileUtils.writeLines(logFile, finder.repeatedFiles, true);			
 		}
 
 		if(!finder.corruptedFiles.isEmpty()) {
-			finder.corruptedFiles.add(0, "\n\n\nWas founded " + finder.corruptedFiles.size() + " files that may be corrupted, need attention.\n\n");
+			finder.logger.add(0, "\n\n\nWas founded " + finder.corruptedFiles.size() + " files that may be corrupted, need attention.\n\n");
+			FileUtils.writeLines(logFile, finder.logger, true);
 			FileUtils.writeLines(logFile, finder.corruptedFiles,true);
 		}
 	}

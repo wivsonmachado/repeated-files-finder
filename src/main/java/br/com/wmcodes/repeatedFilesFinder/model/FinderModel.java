@@ -16,8 +16,9 @@ public class FinderModel {
 	
 	public Map<Path, String> nonRepeatedFiles = new HashMap<>();
 	
-	public List<String> comparingOriginalFiles = new ArrayList<>();
+	public List<Path> repeatedFiles = new ArrayList<>();
 	public List<String> corruptedFiles = new ArrayList<>();
+	public List<String> logger = new ArrayList<>();
 	
 	public void createDirToMove() {
 		File dir = new File(getToMove());
