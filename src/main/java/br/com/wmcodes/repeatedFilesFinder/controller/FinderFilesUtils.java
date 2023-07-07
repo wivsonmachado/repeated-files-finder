@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -158,6 +159,54 @@ public class FinderFilesUtils {
 			return checksum;
 		}
 		return checksum;
+	}
+	
+	public void openMenu(FinderModel model, long inicio) {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Choose a option: ");
+		System.out.println("To create a Log.txt [0]");
+		System.out.println("To delete files     [1]");
+		System.out.println("To move files       [2]");
+		
+		int option = sc.nextInt();
+		switch(option) {
+			case 0:
+				long fim = System.currentTimeMillis();
+				long tempo = fim - inicio;
+				
+				try {
+					createLogFile(tempo);
+				} catch (IOException e) {
+					System.out.println(e.getMessage() + ": Not possible create a log file.");
+				}
+				break;
+			case 1:
+				long fim1 = System.currentTimeMillis();
+				long tempo1 = fim1 - inicio;
+				
+				try {
+					createLogFile(tempo1);
+				} catch (IOException e) {
+					System.out.println(e.getMessage() + ": Not possible create a log file.");
+				}
+				deleteFiles(model, new File(model.getRoot() + "Log.txt"));
+				break;
+			case 2:
+				long fim2 = System.currentTimeMillis();
+				long tempo2 = fim2 - inicio;
+				
+				try {
+					createLogFile(tempo2);
+				} catch (IOException e) {
+					System.out.println(e.getMessage() + ": Not possible create a log file.");
+				}
+				moveFiles(model, new File(model.getRoot() + "Log.txt"));
+				break;
+				
+		}
+		
+		sc.close();
+		
 	}
 	
 	
