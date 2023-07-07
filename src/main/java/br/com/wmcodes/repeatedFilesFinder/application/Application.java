@@ -48,7 +48,16 @@ public class Application {
 				getFiles.deleteFiles(model, new File(model.getRoot() + "Log.txt"));
 				break;
 			case 2:
-				System.out.println("Not implemented yet");
+				long fim2 = System.currentTimeMillis();
+				long tempo2 = fim2 - inicio;
+				
+				try {
+					getFiles.createLogFile(tempo2);
+				} catch (IOException e) {
+					System.out.println(e.getMessage() + ": Not possible create a log file.");
+				}
+				getFiles.moveFiles(model, new File(model.getRoot() + "Log.txt"));
+				break;
 				
 		}
 		

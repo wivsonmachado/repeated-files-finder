@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -71,6 +72,33 @@ public class FinderFilesUtils {
 					Files.deleteIfExists(t);
 					FileUtils.write(logFile, "\nFile deleted: " + t.getFileName().toString(), Charset.forName("UTF-8") , true);
 					finder.logger.add("File deleted: " + t.getFileName().toString());
+				} catch (IOException e) {
+					finder.corruptedFiles.add(finder.corruptedFiles.size(), e.getMessage());
+				}
+			});
+		
+	}
+	
+	public void moveFiles(FinderModel finder, File logFile) {
+		finder.createDirToMove();
+		List<Path> filesToMove = finder.repeatedFiles;
+		Stream<Path> stream = filesToMove.stream();
+		try {
+			FileUtils.write(logFile, "\n\nFiles to move: " + filesToMove.size() + "\n", Charset.forName("UTF-8"), true);
+		} catch (IOException e1) {
+			finder.corruptedFiles.add(finder.corruptedFiles.size(), e1.getMessage());
+		}
+		ProgressBarBuilder builder = new ProgressBarBuilder().setTaskName("Moving Files")
+				.setInitialMax(filesToMove.size());
+		final AtomicInteger count = new AtomicInteger();
+		ProgressBar.wrap(stream, builder)
+			.map(Path::toFile)
+			.forEach(t -> {
+				try {
+					File dest = new File(finder.getToMove() + count.incrementAndGet()  +t.getName()); 
+					FileUtils.moveFile(t, dest);
+					FileUtils.write(logFile, "\nFile moved: " + t.getName().toString(), Charset.forName("UTF-8") , true);
+					finder.logger.add("File deleted: " + t.getName().toString());
 				} catch (IOException e) {
 					finder.corruptedFiles.add(finder.corruptedFiles.size(), e.getMessage());
 				}
